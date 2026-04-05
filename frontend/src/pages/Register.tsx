@@ -43,6 +43,7 @@ export default function Register() {
     const [showPwd, setShowPwd] = useState(false);
     /* Step 3 */
     const [monthlyIncome, setMonthlyIncome] = useState('');
+    const [monthlySavings, setMonthlySavings] = useState('');
     const [otherIncome, setOtherIncome] = useState('');
     const [bizRevenue, setBizRevenue] = useState('');
     const [bizExpenses, setBizExpenses] = useState('');
@@ -100,7 +101,7 @@ export default function Register() {
         setLoading(true);
         try {
             // 1. Register + auto-login
-            await registerAndLogin({ full_name: fullName, email, username, password, account_type: accountType });
+            await registerAndLogin({ full_name: fullName, email, username, password, account_type: accountType, monthly_income: Number(monthlyIncome) || 0, monthly_savings: Number(monthlySavings) || 0 });
 
             // 2. Save income via tax update
             const taxData: any = { regime: taxRegime };
@@ -233,6 +234,7 @@ export default function Register() {
                 {accountType !== 'business' && <>
                     <InputField label="Monthly Income (₹)" type="number" value={monthlyIncome} onChange={setMonthlyIncome} placeholder="e.g. 50000" required />
                     {monthlyIncome && <p className="text-sm text-text-secondary">Annual: ₹{(Number(monthlyIncome) * 12).toLocaleString('en-IN')}</p>}
+                    <InputField label="Monthly Savings (₹)" type="number" value={monthlySavings} onChange={setMonthlySavings} placeholder="e.g. 10000" required />
                     <InputField label="Other Monthly Income (₹, optional)" type="number" value={otherIncome} onChange={setOtherIncome} placeholder="Freelance, rent, dividends..." />
                 </>}
                 {isBiz && <>

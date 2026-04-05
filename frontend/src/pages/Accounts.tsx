@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { accountsAPI } from '../services/accounts.service';
-import { Plus, Pencil, Trash2, Wallet, X, Save } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Plus, Trash2, Wallet, X, Save } from 'lucide-react';
 
 export default function Accounts() {
     const [accounts, setAccounts] = useState<any[]>([]);
+    const { user } = useAuth();
+    const defaultMode = user?.account_type === 'business' ? 'business' : 'personal';
     const [totalBalance, setTotalBalance] = useState(0);
     const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState({ bank_name: '', account_type: 'savings', balance: '', mode: 'personal' });
+    const [form, setForm] = useState({ bank_name: '', account_type: 'savings', balance: '', mode: defaultMode });
     const [loading, setLoading] = useState(true);
 
     const load = () => {
@@ -22,7 +25,7 @@ export default function Accounts() {
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         await accountsAPI.createAccount({ ...form, balance: parseFloat(form.balance) });
-        setForm({ bank_name: '', account_type: 'savings', balance: '', mode: 'personal' });
+        setForm({ bank_name: '', account_type: 'savings', balance: '', mode: defaultMode });
         setShowForm(false);
         load();
     };
@@ -67,13 +70,15 @@ export default function Accounts() {
                             <label className="block text-sm text-text-secondary mb-1">Balance (₹)</label>
                             <input type="number" step="0.01" min="0" value={form.balance} onChange={e => setForm(f => ({ ...f, balance: e.target.value }))} required className="w-full px-4 py-2.5 rounded-xl bg-bg-input border border-border text-text-primary focus:border-primary outline-none" />
                         </div>
-                        <div>
-                            <label className="block text-sm text-text-secondary mb-1">Mode</label>
-                            <select value={form.mode} onChange={e => setForm(f => ({ ...f, mode: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl bg-bg-input border border-border text-text-primary focus:border-primary outline-none">
-                                <option value="personal">Personal</option>
-                                <option value="business">Business</option>
-                            </select>
-                        </div>
+                        {user?.account_type === 'both' && (
+                            <div>
+                                <label className="block text-sm text-text-secondary mb-1">Mode</label>
+                                <select value={form.mode} onChange={e => setForm(f => ({ ...f, mode: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl bg-bg-input border border-border text-text-primary focus:border-primary outline-none">
+                                    <option value="personal">Personal</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
                     <button type="submit" className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-success hover:bg-success/80 text-white text-sm font-medium transition-colors">
                         <Save size={16} /> Save Account

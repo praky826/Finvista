@@ -14,6 +14,8 @@ class RegisterRequest(BaseModel):
     username: str = Field(..., min_length=6, max_length=50)
     password: str = Field(..., min_length=8, max_length=128)
     account_type: str = Field(default="personal")  # personal | business | both
+    monthly_income: Optional[float] = Field(default=0, ge=0)
+    monthly_savings: Optional[float] = Field(default=0, ge=0)
 
     @field_validator("username")
     @classmethod
@@ -67,6 +69,7 @@ class UserResponse(BaseModel):
     username: str
     account_type: str
     monthly_income: Optional[float] = 0
+    monthly_savings: Optional[float] = 0
     monthly_expenses: Optional[float] = 0
 
     class Config:
@@ -76,5 +79,6 @@ class UserResponse(BaseModel):
 class UpdateIncomeRequest(BaseModel):
     """Update monthly income and expenses."""
     monthly_income: Optional[float] = Field(None, gt=0)
+    monthly_savings: Optional[float] = Field(None, ge=0)
     monthly_expenses: Optional[float] = Field(None, ge=0)
     other_monthly_income: Optional[float] = Field(None, ge=0)

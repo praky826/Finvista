@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { loansAPI } from '../services/loans.service';
+import { useAuth } from '../context/AuthContext';
 import { Plus, Trash2, CreditCard, X, Save, AlertTriangle, Shield } from 'lucide-react';
 
 export default function Loans() {
+    const { user } = useAuth();
+    const defaultMode = user?.account_type === 'business' ? 'business' : 'personal';
     const [loans, setLoans] = useState<any[]>([]);
     const [cards, setCards] = useState<any[]>([]);
     const [showLoanForm, setShowLoanForm] = useState(false);
     const [showCardForm, setShowCardForm] = useState(false);
-    const [loanForm, setLoanForm] = useState({ loan_name: '', loan_type: 'personal', outstanding: '', emi: '', interest_rate: '', mode: 'personal' });
+    const [loanForm, setLoanForm] = useState({ loan_name: '', loan_type: 'personal', outstanding: '', emi: '', interest_rate: '', mode: defaultMode });
     const [cardForm, setCardForm] = useState({ card_name: '', credit_limit: '', credit_used: '', emi: '0' });
     const [loading, setLoading] = useState(true);
 
@@ -60,10 +63,16 @@ export default function Loans() {
                 </div>
                 {showLoanForm && (
                     <form onSubmit={addLoan} className="glass-card p-5 mb-4 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <input type="text" placeholder="Loan Name" value={loanForm.loan_name} onChange={e => setLoanForm(f => ({ ...f, loan_name: e.target.value }))} required className="px-3 py-2 rounded-lg bg-bg-input border border-border text-sm text-text-primary focus:border-primary outline-none" />
                             <input type="number" placeholder="Outstanding (₹)" value={loanForm.outstanding} onChange={e => setLoanForm(f => ({ ...f, outstanding: e.target.value }))} required className="px-3 py-2 rounded-lg bg-bg-input border border-border text-sm text-text-primary focus:border-primary outline-none" />
                             <input type="number" placeholder="Monthly EMI (₹)" value={loanForm.emi} onChange={e => setLoanForm(f => ({ ...f, emi: e.target.value }))} required className="px-3 py-2 rounded-lg bg-bg-input border border-border text-sm text-text-primary focus:border-primary outline-none" />
+                            {user?.account_type === 'both' && (
+                                <select value={loanForm.mode} onChange={e => setLoanForm(f => ({ ...f, mode: e.target.value }))} className="px-3 py-2 rounded-lg bg-bg-input border border-border text-sm text-text-primary focus:border-primary outline-none">
+                                    <option value="personal">Personal</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            )}
                         </div>
                         <div className="flex gap-2">
                             <button type="submit" className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-success text-white text-sm"><Save size={14} /> Save</button>

@@ -7,14 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 from app.routers import (
-    auth, accounts, loans, investments, tax, business, dashboard
+    auth, accounts, loans, investments, tax, business, dashboard, assets
 )
 
 # Import all models so they register with Base.metadata
 from app.models import (  # noqa: F401
     User, BankAccount, Loan, CreditCard, Investment,
     Goal, Tax, PersonalMetrics, BusinessMetrics, Alert, Cash,
-    BusinessInventory, BusinessReceivable, BusinessPayable, ScheduledAlert,
+    BusinessInventory, BusinessReceivable, BusinessPayable, ScheduledAlert, Asset
 )
 
 # ── Create FastAPI app ──
@@ -35,7 +35,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Include Routers ──
+# ── CORS Configuration ──
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ── API Routes ──
 app.include_router(auth.router)
 app.include_router(accounts.router)
 app.include_router(loans.router)
@@ -43,6 +52,7 @@ app.include_router(investments.router)
 app.include_router(tax.router)
 app.include_router(business.router)
 app.include_router(dashboard.router)
+app.include_router(assets.router)
 
 
 # ── Startup Event: Create Tables ──

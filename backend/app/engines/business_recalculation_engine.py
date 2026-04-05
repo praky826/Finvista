@@ -15,6 +15,8 @@ from app.models.cash import Cash
 from app.models.business_inventory import BusinessInventory
 from app.models.business_receivables import BusinessReceivable
 from app.models.business_payables import BusinessPayable
+from app.models.asset import Asset
+from app.models.investment import Investment
 from app.engines import financial_calculations
 from app.engines.alert_engine import evaluate_business_alerts
 
@@ -77,20 +79,30 @@ def recalculate_business_metrics(user_id: int, db: Session) -> dict:
     total_receivables = sum((r.invoice_amount or Decimal(0)) for r in receivables)
     total_payables = sum((p.bill_amount or Decimal(0)) for p in payables)
 
-    # ── STEP 3: BUSINESS CALCULATIONS ──
-    biz_net_profit = financial_calculations.calculate_net_profit(revenue, expenses, cogs)
+    biz_tax_calc = financial_calculations.calculate_business_tax(revenue, expenses, cogs)
+    biz_tax_paid = Decimal(str(biz_tax_calc["annual_tax"]))
+    biz_net_profit = financial_calculations.calculate_net_profit(revenue, expenses, cogs, tax_paid=biz_tax_paid)
 
     current_assets = business_bank + business_cash + total_inventory + total_receivables
     current_liabilities = total_payables + sum(
         (l.outstanding or Decimal(0)) for l in business_loans
     )
 
+    # Add Fixed Assets & Investments to Net Worth
+    assets = db.query(Asset).filter(Asset.user_id == user_id).all()
+    investments = db.query(Investment).filter(Investment.user_id == user_id).all()
+    
+    total_custom_assets = sum((a.value or Decimal(0)) for a in assets)
+    total_investments = sum((i.value or Decimal(0)) for i in investments)
+    
+    total_assets = current_assets + total_custom_assets + total_investments
+
     biz_working_capital = financial_calculations.calculate_working_capital(current_assets, current_liabilities)
     biz_liquidity = financial_calculations.calculate_liquidity_ratio(current_assets, max(current_liabilities, Decimal(1)))
 
     biz_debt_ratio = financial_calculations.calculate_debt_ratio(
         current_liabilities,
-        current_assets if current_assets > 0 else Decimal(1),
+        total_assets if total_assets > 0 else Decimal(1),
     )
 
     margins = financial_calculations.calculate_profit_margins(revenue, cogs, biz_net_profit)
@@ -103,7 +115,7 @@ def recalculate_business_metrics(user_id: int, db: Session) -> dict:
     biz_cash_flow = financial_calculations.calculate_cash_flow_business(revenue, expenses, total_emi)
 
     biz_net_worth = financial_calculations.calculate_net_worth(
-        (business_bank + business_cash + total_inventory + total_receivables),
+        total_assets,
         (total_payables + sum((l.outstanding or Decimal(0)) for l in business_loans)),
     )
 

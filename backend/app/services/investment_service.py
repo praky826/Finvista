@@ -4,11 +4,13 @@ from app.models.investment import Investment
 from app.models.goal import Goal
 from app.schemas.finance_schemas import InvestmentCreate, InvestmentUpdate, GoalCreate, GoalUpdate
 from app.engines.personal_recalculation_engine import recalculate_personal_metrics
+from app.engines.business_recalculation_engine import recalculate_business_metrics
 
 class InvestmentService:
     @staticmethod
     def _recalc(user_id: int, db: Session):
         recalculate_personal_metrics(user_id, db)
+        recalculate_business_metrics(user_id, db)
 
     # ── Investments ──
     @staticmethod

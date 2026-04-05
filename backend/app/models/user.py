@@ -16,6 +16,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     account_type = Column(String(20), nullable=False, default="personal")  # personal | business | both
     monthly_income = Column(Numeric(15, 2), default=0)
+    monthly_savings = Column(Numeric(15, 2), default=0)
     monthly_expenses = Column(Numeric(15, 2), default=0)
     other_monthly_income = Column(Numeric(15, 2), default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -37,3 +38,4 @@ class User(Base):
     business_receivables = relationship("BusinessReceivable", back_populates="user", cascade="all, delete-orphan")
     business_payables = relationship("BusinessPayable", back_populates="user", cascade="all, delete-orphan")
     scheduled_alerts = relationship("ScheduledAlert", back_populates="user", cascade="all, delete-orphan")
+    assets = relationship("Asset", back_populates="user", cascade="all, delete-orphan")

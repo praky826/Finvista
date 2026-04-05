@@ -10,6 +10,8 @@ from app.models.goal import Goal
 from app.models.bank_account import BankAccount
 from app.engines.personal_recalculation_engine import recalculate_personal_metrics
 from app.engines.business_recalculation_engine import recalculate_business_metrics
+from app.models.loan import Loan
+from app.models.credit_card import CreditCard
 from decimal import Decimal
 from datetime import date
 
@@ -57,12 +59,19 @@ def get_personal_dashboard(user_id: int, db: Session) -> dict:
     # Goal summaries
     goal_data = _build_goal_data(goals)
 
+    # Calculate implicit expenses
+    loans = db.query(Loan).filter(Loan.user_id == user_id).all()
+    cards = db.query(CreditCard).filter(CreditCard.user_id == user_id).all()
+    total_emi = sum(float(l.emi or 0) for l in loans) + sum(float(c.emi or 0) for c in cards)
+    implicit_expenses = float((user.monthly_income or 0) + (user.other_monthly_income or 0)) - total_emi - float(user.monthly_savings or 0)
+    calculated_expenses = float(user.monthly_expenses) if user.monthly_expenses else max(implicit_expenses, 0)
+
     return {
         "user_id": user_id,
         "account_type": user.account_type,
         "full_name": user.full_name,
         "monthly_income": float(user.monthly_income or 0),
-        "monthly_expenses": float(user.monthly_expenses or 0),
+        "monthly_expenses": calculated_expenses,
         "summary": summary,
         "alerts": _format_alerts(personal_alerts),
         "goals": goal_data,

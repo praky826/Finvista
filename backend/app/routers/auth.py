@@ -40,6 +40,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         username=request.username,
         password_hash=hash_password(request.password),
         account_type=request.account_type,
+        monthly_income=request.monthly_income,
+        monthly_savings=request.monthly_savings,
     )
     db.add(user)
     db.commit()
@@ -125,6 +127,7 @@ def get_me(current_user: User = Depends(get_current_user)):
             "username": current_user.username,
             "account_type": current_user.account_type,
             "monthly_income": float(current_user.monthly_income or 0),
+            "monthly_savings": float(current_user.monthly_savings or 0),
             "monthly_expenses": float(current_user.monthly_expenses or 0),
         },
     }

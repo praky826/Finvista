@@ -10,6 +10,7 @@ import Investments from './pages/Investments';
 import Tax from './pages/Tax';
 import Goals from './pages/Goals';
 import Alerts from './pages/Alerts';
+import Assets from './pages/Assets';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="tax" element={<Tax />} />
         <Route path="goals" element={<Goals />} />
         <Route path="alerts" element={<Alerts />} />
+        <Route path="assets" element={<Assets />} />
       </Route>
     </Routes>
   );

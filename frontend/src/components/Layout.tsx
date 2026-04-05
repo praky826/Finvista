@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Wallet, CreditCard, TrendingUp, Calculator, Target, Bell, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Wallet, CreditCard, TrendingUp, Calculator, Target, Bell, LogOut, Menu, X, Archive } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
     { path: '/tax', label: 'Tax', icon: Calculator },
     { path: '/goals', label: 'Goals', icon: Target },
     { path: '/alerts', label: 'Alerts', icon: Bell },
+    { path: '/assets', label: 'Assets', icon: Archive },
 ];
 
 export default function Layout() {

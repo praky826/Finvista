@@ -24,14 +24,14 @@ def calculate_liquid_asset_percentage(liquid_assets: Decimal, total_assets: Deci
     return ((liquid_assets / total_assets) * 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
-def calculate_savings_ratio(monthly_income: Decimal, monthly_expenses: Decimal) -> Decimal:
+def calculate_savings_ratio(monthly_income: Decimal, monthly_savings: Decimal) -> Decimal:
     """
-    Savings Ratio = ((Income - Expenses) / Income) × 100
+    Savings Ratio = (Monthly Savings / Monthly Income) × 100
     >30% Excellent | 20-30% Good | 10-20% Average | <10% Poor
     """
     if monthly_income == 0:
         return Decimal(0)
-    return (((monthly_income - monthly_expenses) / monthly_income) * 100).quantize(
+    return ((monthly_savings / monthly_income) * 100).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
 

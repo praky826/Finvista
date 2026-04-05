@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { taxAPI } from '../services/tax.service';
-import { Calculator, ArrowRight, Save, CheckCircle } from 'lucide-react';
+import { Save, CheckCircle } from 'lucide-react';
 
 export default function Tax() {
-    const [taxData, setTaxData] = useState<any>(null);
+
     const [comparison, setComparison] = useState<any>(null);
     const [editing, setEditing] = useState(false);
     const [form, setForm] = useState({ regime: 'new', annual_income: '', deductions_80c: '', deductions_80d: '', deductions_80tta: '', other_deductions: '' });
@@ -13,7 +13,6 @@ export default function Tax() {
         Promise.all([taxAPI.getTax().catch(() => ({ data: { data: null } })), taxAPI.getTaxComparison().catch(() => ({ data: { data: null } }))])
             .then(([t, c]) => {
                 if (t.data.data) {
-                    setTaxData(t.data.data);
                     setForm({
                         regime: t.data.data.regime || 'new',
                         annual_income: String(t.data.data.annual_income || ''),

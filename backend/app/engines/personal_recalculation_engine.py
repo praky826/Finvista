@@ -14,6 +14,7 @@ from app.models.investment import Investment
 from app.models.tax import Tax
 from app.models.personal_metrics import PersonalMetrics
 from app.models.cash import Cash
+from app.models.asset import Asset
 from app.engines import financial_calculations
 from app.engines import health_score_engine
 from app.engines.alert_engine import evaluate_personal_alerts
@@ -40,6 +41,7 @@ def recalculate_personal_metrics(user_id: int, db: Session) -> dict:
     loans = db.query(Loan).filter(Loan.user_id == user_id).all()
     credit_cards = db.query(CreditCard).filter(CreditCard.user_id == user_id).all()
     investments = db.query(Investment).filter(Investment.user_id == user_id).all()
+    assets = db.query(Asset).filter(Asset.user_id == user_id).all()
     tax_info = db.query(Tax).filter(Tax.user_id == user_id).first()
     cash_records = db.query(Cash).filter(Cash.user_id == user_id).all()
 
@@ -57,8 +59,11 @@ def recalculate_personal_metrics(user_id: int, db: Session) -> dict:
     # Investment totals
     total_investments = sum((inv.value or Decimal(0)) for inv in investments)
 
+    # Custom Assets totals
+    total_custom_assets = sum((a.value or Decimal(0)) for a in assets)
+
     # Total assets (personal)
-    total_assets = total_bank + personal_cash + total_investments
+    total_assets = total_bank + personal_cash + total_investments + total_custom_assets
 
     # Loan totals
     total_loan_outstanding = sum((l.outstanding or Decimal(0)) for l in loans)
@@ -71,15 +76,18 @@ def recalculate_personal_metrics(user_id: int, db: Session) -> dict:
 
     total_liabilities = total_loan_outstanding + total_credit_used
 
-    # Monthly income/expenses
     monthly_income = user.monthly_income or Decimal(0)
-    monthly_expenses = user.monthly_expenses or Decimal(0)
+    monthly_savings = user.monthly_savings or Decimal(0)
     other_income = user.other_monthly_income or Decimal(0)
     effective_income = monthly_income + other_income
+    
+    # Calculate implicit living expenses: Income - EMI - Savings
+    implicit_expenses = effective_income - total_emi - monthly_savings
+    monthly_expenses = user.monthly_expenses or (implicit_expenses if implicit_expenses > 0 else Decimal(0))
 
     # ── STEP 3: PERSONAL CALCULATIONS ──
     net_worth = financial_calculations.calculate_net_worth(total_assets, total_liabilities)
-    savings_ratio = financial_calculations.calculate_savings_ratio(effective_income, monthly_expenses)
+    savings_ratio = financial_calculations.calculate_savings_ratio(effective_income, monthly_savings)
     dti = financial_calculations.calculate_dti(total_emi, effective_income)
     emergency_fund = financial_calculations.calculate_emergency_fund(total_bank + personal_cash, monthly_expenses)
     credit_utilization = financial_calculations.calculate_credit_utilization(total_credit_used, total_credit_limit)

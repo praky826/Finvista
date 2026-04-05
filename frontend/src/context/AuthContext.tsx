@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { authAPI } from '../services/auth.service';
 
 interface User {
@@ -8,6 +9,7 @@ interface User {
     username: string;
     account_type: string;
     monthly_income: number;
+    monthly_savings: number;
     monthly_expenses: number;
 }
 
@@ -54,8 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: data.email || '',
             username: username,
             account_type: data.account_type || 'personal',
-            monthly_income: 0,
-            monthly_expenses: 0,
+            monthly_income: data.monthly_income || 0,
+            monthly_savings: data.monthly_savings || 0,
+            monthly_expenses: data.monthly_expenses || 0,
         });
     };
 

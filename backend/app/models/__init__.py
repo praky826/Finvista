@@ -17,10 +17,11 @@ from app.models.business_inventory import BusinessInventory
 from app.models.business_receivables import BusinessReceivable
 from app.models.business_payables import BusinessPayable
 from app.models.scheduled_alert import ScheduledAlert
+from app.models.asset import Asset
 
 __all__ = [
     "User", "BankAccount", "Loan", "CreditCard", "Investment",
     "Goal", "Tax", "PersonalMetrics", "BusinessMetrics", "Alert", "Cash",
     "BusinessInventory", "BusinessReceivable", "BusinessPayable",
-    "ScheduledAlert",
+    "ScheduledAlert", "Asset"
 ]
